@@ -13,7 +13,7 @@ import keras
 from keras import backend as K
 from keras.models import Sequential,Input,Model
 from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers. normalization import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
 import matplotlib.pyplot as plt
@@ -26,7 +26,7 @@ if K.image_data_format() == 'channels_last':
 print(K.image_data_format())
 
 
-cross_validation = 0.3
+cross_validation = 0.1
 
 IMG_SIZE = 60
 
@@ -39,75 +39,34 @@ class_nonmitos = glob.glob(NONMITOSIS_PATH+'*.npy')
 shuffle(class_mitos)
 shuffle(class_nonmitos)
 
-split_p = int( len(class_mitos)*cross_validation )
-
-train_data_mitosis = class_mitos[split_p:]
-test_data_mitosis = class_mitos[:split_p]
-
-split_p = int( len(class_nonmitos)*cross_validation )
-train_data_nonmitosis = class_nonmitos[split_p:]
-test_data_nonmitosis = class_nonmitos[:split_p]
-print('split complete')
-
-
 
 train_data = []
-ii_step = int(len(train_data_mitosis) / 10)
+ii_step = int(len(class_mitos) / 10)
 progress = 0
-for ii,numpy_dump in enumerate(train_data_mitosis):
+for ii,numpy_dump in enumerate(class_mitos):
     data = np.load(numpy_dump).astype('float32')/255.0
     train_data.append([data,np.array([1,0])])
     if ii>progress:
-        print('mitosis',len(train_data_mitosis),'/',progress)
+        print('mitosis',len(class_mitos),'/',progress)
         progress += ii_step
         
 print('mitosis train data generated')
 
-ii_step = int(len(train_data_nonmitosis) / 10)
+ii_step = int(len(class_nonmitos) / 10)
 progress = 0
-for ii,numpy_dump in enumerate(train_data_nonmitosis):
+for ii,numpy_dump in enumerate(class_nonmitos):
     data = np.load(numpy_dump).astype('float32')/255.0
     train_data.append([data,np.array([0,1])])
     if ii>progress:
-        print('nonmitosis',len(train_data_nonmitosis),'/',progress)
+        print('nonmitosis',len(class_nonmitos),'/',progress)
         progress += ii_step
         
 print('nonmitosis train data generated')
 
 
 
-test_data = []
-ii_step = int(len(test_data_mitosis) / 10)
-progress = 0
-for ii,numpy_dump in enumerate(test_data_mitosis):
-    data = np.load(numpy_dump).astype('float32')/255.0
-    #data = data.reshape(data.shape[1],data.shape[2],data.shape[0])
-    test_data.append([data,np.array([1,0])])
-    if ii>progress:
-        print('test mitosis',len(test_data_mitosis),'/',progress)
-        progress += ii_step
-
-print('mitosis test data generated')
-
-ii_step = int(len(test_data_nonmitosis) / 10)
-progress = 0
-for ii,numpy_dump in enumerate(test_data_nonmitosis):
-    data = np.load(numpy_dump).astype('float32')/255.0
-    #data = data.reshape(data.shape[1],data.shape[2],data.shape[0])
-    test_data.append([data,np.array([0,1])])
-    if ii>progress:
-        print('test nonmitosis',len(test_data_nonmitosis),'/',progress)
-        progress += ii_step
-print('nonmitosis test data generated')
-
-
-
-
-
 trainImages = np.array([i[0] for i in train_data])
 trainLabels = np.array([i[1] for i in train_data])
-testImages = np.array([i[0] for i in test_data])
-testLabels = np.array([i[1] for i in test_data])
 print('data converted as numpy array')
 
 
@@ -116,12 +75,12 @@ inputShape = (10, IMG_SIZE, IMG_SIZE)
 print(inputShape)
 
 model = Sequential()
-model.add(Conv2D(32, kernel_size = (3, 3), activation='relu', input_shape=inputShape))
-model.add(Conv2D(128, kernel_size=(3,3), activation='relu'))
-model.add(Conv2D(128, kernel_size=(5,5), activation='relu'))
+model.add(Convolution2D(32, kernel_size = (3, 3), activation='relu', input_shape=inputShape))
+model.add(Convolution2D(128, kernel_size=(3,3), activation='relu'))
+model.add(Convolution2D(128, kernel_size=(5,5), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Conv2D(256, kernel_size=(3,3), activation='relu'))
-model.add(Conv2D(256, kernel_size=(5,5), activation='relu'))
+model.add(Convolution2D(256, kernel_size=(3,3), activation='relu'))
+model.add(Convolution2D(256, kernel_size=(5,5), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
@@ -132,7 +91,7 @@ model.add(Dense(2, activation = 'softmax'))
 
 model.compile(loss='binary_crossentropy', optimizer='adadelta', metrics = ['accuracy'])
 train_model = model.fit(trainImages, trainLabels, batch_size = 50, epochs = 6, verbose = 1,
-                        validation_data=(testImages, testLabels))
+                        validation_split=0.2)
 
 
 
