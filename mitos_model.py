@@ -30,6 +30,8 @@ class MITOSIS_CNN:
         self.IMG_SIZE = img_size
         self.channels = channels
         self.train_data_generated = False
+        self.input_shape = (self.channels, self.IMG_SIZE, self.IMG_SIZE)  
+        print('Input shape:',self.input_shape)
 
         self.model = Sequential()
         self.model.add(Convolution2D(32,
@@ -54,6 +56,8 @@ class MITOSIS_CNN:
         if self.weights is not None:
             self.model.load_weights(self.weights)
             self.model_trained = True
+        else:
+            self.model_trained = False
         self.model.compile(loss='binary_crossentropy',
                            optimizer='adadelta',
                            metrics = ['accuracy'])
@@ -95,14 +99,12 @@ class MITOSIS_CNN:
             self.trainImages = np.array([i[0] for i in train_data])
             self.trainLabels = np.array([i[1] for i in train_data])
             print('data converted as numpy array')
-            
+            print(self.trainImages.shape)
             self.trainImages = self.trainImages.reshape((self.trainImages.shape[0],
                                                          self.channels,
                                                          self.trainImages.shape[1],
                                                          self.trainImages.shape[2]))
             self.train_data_generated = True
-            self.input_shape = inputShape = (self.channels, self.IMG_SIZE, self.IMG_SIZE)  
-            print('Input shape:',inputShape)
             print('\nRun train_model()')
         
         else:
@@ -110,7 +112,7 @@ class MITOSIS_CNN:
             print('MITOSIS_CNN.model_trained = False')
     
     
-    def train_model(self,cross_validation=0.3):
+    def train_model(self,epochs=10,min_delta=0.001,cross_validation=0.3):
         if(self.train_data_generated==True):
             checkpoint = ModelCheckpoint('weights',
                                          monitor='acc',
@@ -118,15 +120,15 @@ class MITOSIS_CNN:
                                          save_best_only=True,
                                          mode='max')
             early_stop = EarlyStopping(monitor='acc',
-                                       min_delta=0.01,
-                                       patience=5,
+                                       min_delta=min_delta,
+                                       patience=10,
                                        mode='max') 
             
             callbacks_list = [checkpoint,early_stop]
             self.train_model = self.model.fit(self.trainImages,
                                          self.trainLabels,
                                          batch_size = 100,
-                                         epochs = 10,
+                                         epochs = epochs,
                                          verbose = 1,
                                          validation_split=cross_validation,
                                          callbacks=callbacks_list)
