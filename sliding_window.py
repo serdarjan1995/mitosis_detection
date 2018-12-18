@@ -22,7 +22,7 @@ images_path = 'DI_IMAGES/'
 
 model = MITOSIS_CNN(IMG_SIZE, weights=None, channels=1)
 model.generate_train_data(MITOSIS_PATH,NONMITOSIS_PATH)
-model.train_model(epochs=30,min_delta=0.001,cross_validation=0.1)
+model.train_model(epochs=30,min_delta=0.001,cross_validation=0.15)
 
 
 
