@@ -113,9 +113,9 @@ class MITOSIS_CNN:
             print('MITOSIS_CNN.model_trained = False')
     
     
-    def train_model(self,epochs=20,min_delta=0.01,cross_validation=0.1):
+    def train_model(self,epochs=20,min_delta=0.01,cross_validation=0.1,weights_name='weights'):
         if(self.train_data_generated==True):
-            checkpoint = ModelCheckpoint('weights',
+            checkpoint = ModelCheckpoint(weights_name,
                                          monitor='acc',
                                          verbose=1,
                                          save_best_only=True,
