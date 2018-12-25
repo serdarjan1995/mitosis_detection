@@ -108,12 +108,8 @@ class MITOSIS_CNN:
             
             self.trainImages = np.array([i[0] for i in train_data])
             self.trainLabels = np.array([i[1] for i in train_data])
-            print('data converted as numpy array')
+            print('data converted as numpy array')                
             print(self.trainImages.shape)
-            self.trainImages = self.trainImages.reshape((self.trainImages.shape[0],
-                                                         self.channels,
-                                                         self.trainImages.shape[1],
-                                                         self.trainImages.shape[2]))
             self.train_data_generated = True
             print('\nRun train_model()')
         
