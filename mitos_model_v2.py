@@ -31,7 +31,10 @@ class MITOSIS_CNN:
         self.IMG_SIZE = img_size
         self.channels = channels
         self.train_data_generated = False
-        self.input_shape = (self.channels, self.IMG_SIZE, self.IMG_SIZE)  
+        if channels_format=='channels_last':
+            self.input_shape = (self.IMG_SIZE, self.IMG_SIZE,self.channels)
+        else:
+            self.input_shape = (self.channels, self.IMG_SIZE, self.IMG_SIZE)  
         print('Input shape:',self.input_shape)
 
         self.model = Sequential()
