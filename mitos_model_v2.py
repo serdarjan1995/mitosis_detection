@@ -25,8 +25,14 @@ class MITOSIS_CNN:
                  channels=1,
                  channels_format='channels_last'):
         #change channel format
-        K.set_image_data_format(channels_format)
-                    
+        c1 = 'channels_last'
+        c2 = 'channels_first'
+        if K.image_data_format() == c2 and channels_format==c1:
+            K.set_image_data_format(c1)
+        elif K.image_data_format() == c1 and channels_format==c2:
+            K.set_image_data_format(c2) 
+        print(K.image_data_format())
+        
         self.weights = weights
         self.IMG_SIZE = img_size
         self.channels = channels
